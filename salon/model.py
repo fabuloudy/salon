@@ -2,59 +2,68 @@ from salon import Salon
 from statistics import Statistic
 from request import Request
 import random
+import re
 class Model:
-    ONE_WORK_DAY = 480
-    #interval = values['step]
-    def __init__(self,firstRoomAmount, secondRoomAmount, thirdRoomAmount,interval):
+
+    oneDay = 480
+    def __init__(self,firstRoomAmount, secondRoomAmount, thirdRoomAmount,interval,
+                    requestPeriod,taskPeriod):
         self.salon = Salon(firstRoomAmount, secondRoomAmount, thirdRoomAmount)
-        self.timeInterval = self.takeTimeInterval(interval) #шаг моделирования
-        self.timePerOneDay = 0 #время работы салона в день
-        self.numberOfDay = 0 #номер дня
-        self.currentTimePerStep = 0 #время в шаге
-        self.currentAmountOfRequestPerDay = 0 #количество заявок в день
-        self.totalLostRequests = 0 #количество ушедних клиентов за все дни
-        self.totalAverageSalary = 0 #средняя зарплата за все дни
-        self.totalAverageSpentTime = 0 #среднее время работы за все дни
-        self.totalCompletedRequests = 0 #количество обслуженных клиентов за все дни
-        self.totalProfit = 0 #доход салона за все дни
-        self.totalFreeTime = 0 #свободное время мастеров за все дни
+        self.timeInterval = self.takeTimeInterval(interval)
+        self.timePerOneDay = 0
+        self.numberOfDay = 0
+        self.timeStep = 0
+        self.countRequestDay = 0
+        self.allLostRequests = 0
+        self.allAverageSalary = 0
+        self.allAverageWorkTime = 0
+        self.allCompletedRequests = 0
+        self.allProfit = 0
+        self.allFreeTime = 0
+        self.timeRequestPeriod = self.takePeriod(requestPeriod)
+        self.timeTaskPeriod = self.takePeriod(taskPeriod)
 
     def takeTimeInterval(self,interval):
         switcher={
-            "15мин": 15,
-            "30мин": 30
+            "15 минут": 15,
+            "30 минут": 30,
+            "1 час": 60
         }
         return switcher.get(interval,15)
-#метод возращает статистику
+    def takePeriod(self,str_period):
+        period = re.findall(r'\d{1,3}', str_period)
+        print(period)
+        return period
+
     def nextStep(self):
-        while (self.currentTimePerStep < self.timeInterval):
-            self.salon.giveRequestMasters(self.currentTimePerStep + self.timePerOneDay)
-            self.currentTimePerStep = self.currentTimePerStep + self.generateRequest(self.currentTimePerStep + self.timePerOneDay)
-            self.currentAmountOfRequestPerDay = self.currentAmountOfRequestPerDay + 1
+        while (self.timeStep < self.timeInterval):
+            self.salon.giveRequestMasters(self.timeStep + self.timePerOneDay,self.timeTaskPeriod)
+            self.timeStep = self.timeStep + self.generateRequest(self.timeStep + self.timePerOneDay)
+            self.countRequestDay = self.countRequestDay + 1
         self.timePerOneDay = self.timePerOneDay + self.timeInterval
-        self.salon.giveRequestMasters(self.timePerOneDay)
-        if (self.timePerOneDay == self.ONE_WORK_DAY):
+        self.salon.giveRequestMasters(self.timePerOneDay,self.timeTaskPeriod)
+        if (self.timePerOneDay == self.oneDay):
             self.numberOfDay = self.numberOfDay + 1
             self.timePerOneDay = 0
-            self.currentTimePerStep = 0
+            self.timeStep = 0
             return self.collectStatistics()
         else:
-            self.currentTimePerStep = self.currentTimePerStep - self.timeInterval
+            self.timeStep = self.timeStep - self.timeInterval
         return None
-#метод возвращает статистику
+
     def collectStatistics(self):
-        lostRequests = self.salon.getFirstHall().getWentAway() + self.salon.getSecondHall().getWentAway() + self.salon.getThirdHall().getWentAway()
-        self.totalLostRequests = self.totalLostRequests + lostRequests
-        averageSalary = int((self.salon.getFirstHall().getAverageSalary() + self.salon.getSecondHall().getAverageSalary() + self.salon.getThirdHall().getAverageSalary()) / 3)
-        self.totalAverageSalary += averageSalary
-        averageSpentTime = int((self.salon.getFirstHall().getAverageSpentTime() + self.salon.getSecondHall().getAverageSpentTime() + self.salon.getThirdHall().getAverageSpentTime()) / 3)
-        self.totalAverageSpentTime = self.totalAverageSpentTime + averageSpentTime
-        completedRequests = self.salon.getFirstHall().getCompletedRequests() + self.salon.getSecondHall().getCompletedRequests() + self.salon.getThirdHall().getCompletedRequests()
-        self.totalCompletedRequests = self.totalCompletedRequests + completedRequests
-        profit = int(self.salon.getFirstHall().getProfit() + self.salon.getSecondHall().getProfit() + self.salon.getThirdHall().getProfit())
-        self.totalProfit = self.totalProfit + profit
-        freeTime = (self.ONE_WORK_DAY - averageSpentTime) * 100 / self.ONE_WORK_DAY
-        self.totalFreeTime = self.totalFreeTime + freeTime
+        lostRequests = self.salon.getFirstRoom().getWentAway() + self.salon.getSecondRoom().getWentAway() + self.salon.getThirdRoom().getWentAway()
+        self.allLostRequests = self.allLostRequests + lostRequests
+        averageSalary = int((self.salon.getFirstRoom().getAverageSalary() + self.salon.getSecondRoom().getAverageSalary() + self.salon.getThirdRoom().getAverageSalary()) / 3)
+        self.allAverageSalary += averageSalary
+        averageSpentTime = int((self.salon.getFirstRoom().getAverageSpentTime() + self.salon.getSecondRoom().getAverageSpentTime() + self.salon.getThirdRoom().getAverageSpentTime()) / 3)
+        self.allAverageWorkTime = self.allAverageWorkTime + averageSpentTime
+        completedRequests = self.salon.getFirstRoom().getCompletedRequests() + self.salon.getSecondRoom().getCompletedRequests() + self.salon.getThirdRoom().getCompletedRequests()
+        self.allCompletedRequests = self.allCompletedRequests + completedRequests
+        profit = int(self.salon.getFirstRoom().getProfit() + self.salon.getSecondRoom().getProfit() + self.salon.getThirdRoom().getProfit())
+        self.allProfit = self.allProfit + profit
+        freeTime = (self.oneDay - averageSpentTime) * 100 / self.oneDay
+        self.allFreeTime = self.allFreeTime + freeTime
         self.salon.updateDataForNextDay()
         return Statistic(self.numberOfDay - 1, completedRequests, lostRequests, profit, averageSalary, averageSpentTime, freeTime)
 
@@ -74,18 +83,16 @@ class Model:
         self.salon.receiveRequest(Request(firstService, secondService, thirdService, currentTime))
 
         timeUntilNextRequest = 0
-        minNext = random.random()
-        #диапазон получения заявки
         if (self.numberOfDay > 4 or self.timePerOneDay > 300):
-            timeUntilNextRequest = int(minNext * 10)
+            timeUntilNextRequest = random.randint(int(self.timeRequestPeriod[0]),int(self.timeRequestPeriod[1]))
         else:
-            timeUntilNextRequest = int(minNext * 20)
-        
-        return timeUntilNextRequest
-    
+            timeUntilNextRequest = random.randint(int(self.timeRequestPeriod[0])+10,int(self.timeRequestPeriod[1])+10)
 
-    def getCurrentAmountOfRequestPerDay(self):
-        return self.currentAmountOfRequestPerDay
+        return timeUntilNextRequest
+
+
+    def getCountRequestDay(self):
+        return self.countRequestDay
 
     def getTimePerOneDay(self):
         return self.timePerOneDay
@@ -93,25 +100,25 @@ class Model:
     def getNumberOfDay(self):
         return self.numberOfDay
 
-    def getSaloon(self):
+    def getSalon(self):
         return self.salon
 
-    def getTotalLostRequests(self):
-        return self.totalLostRequests
+    def getAllLostRequests(self):
+        return self.allLostRequests
 
-    def getTotalAverageSalary(self):
-        return self.totalAverageSalary
+    def getAllAverageSalary(self):
+        return self.allAverageSalary
 
-    def getTotalAverageSpentTime(self):
-        return self.totalAverageSpentTime
+    def getAllAverageWorkTime(self):
+        return self.allAverageWorkTime
 
-    def getTotalCompletedRequests(self):
-        return self.totalCompletedRequests
+    def getAllCompletedRequests(self):
+        return self.allCompletedRequests
 
-    def getTotalProfit(self):
-        return self.totalProfit
+    def getAllProfit(self):
+        return self.allProfit
 
-    def getTotalFreeTime(self):
-        return self.totalFreeTime
-    
+    def getAllFreeTime(self):
+        return self.allFreeTime
+
 

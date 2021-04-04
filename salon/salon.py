@@ -1,33 +1,33 @@
 from room import Room
 class Salon:
-    def __init__(self,amountFirstHall,amountSecondHall,amountThirdHall):
-        self.firstHall = Room(amountFirstHall)
-        self.secondHall = Room(amountSecondHall)
-        self.thirdHall = Room(amountThirdHall)
+    def __init__(self,amountFirstRoom,amountSecondRoom,amountThirdRoom):
+        self.firstRoom = Room(amountFirstRoom)
+        self.secondRoom = Room(amountSecondRoom)
+        self.thirdRoom = Room(amountThirdRoom)
 
     def receiveRequest(self,request):
         if (request.getFirstService()):
-            self.firstHall.addToQueue(request)
+            self.firstRoom.addToQueue(request)
         elif (request.getSecondService()):
-            self.secondHall.addToQueue(request)
+            self.secondRoom.addToQueue(request)
         else:
-            self.thirdHall.addToQueue(request)
+            self.thirdRoom.addToQueue(request)
 
-    def giveRequestMasters(self,currentTime):
-        self.firstHall.giveRequestMasters(currentTime)
-        self.secondHall.giveRequestMasters(currentTime)
-        self.thirdHall.giveRequestMasters(currentTime)
+    def giveRequestMasters(self,currentTime,period):
+        self.firstRoom.giveRequestMasters(currentTime,period)
+        self.secondRoom.giveRequestMasters(currentTime,period)
+        self.thirdRoom.giveRequestMasters(currentTime,period)
 
-    def getFirstHall(self):
-        return self.firstHall
+    def getFirstRoom(self):
+        return self.firstRoom
 
-    def getSecondHall(self):
-        return self.secondHall
+    def getSecondRoom(self):
+        return self.secondRoom
 
-    def getThirdHall(self):
-        return self.thirdHall
+    def getThirdRoom(self):
+        return self.thirdRoom
 
     def updateDataForNextDay(self):
-        self.firstHall.updateData()
-        self.secondHall.updateData()
-        self.thirdHall.updateData()
+        self.firstRoom.updateData()
+        self.secondRoom.updateData()
+        self.thirdRoom.updateData()

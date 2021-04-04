@@ -7,7 +7,7 @@ class Statistic:
         self.averageSalary = averageSalary
         self.averageWorkingTime = averageWorkingTime
         self.freeTime = freeTime
-    
+
 
     def getNumberOfDay(self):
         return self.numberOfDay
@@ -29,4 +29,3 @@ class Statistic:
 
     def getFreeTime(self):
         return self.freeTime
-    

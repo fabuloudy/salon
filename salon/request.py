@@ -1,20 +1,20 @@
 
-class Request: 
+class Request:
 
-    def __init__(self,firstService,secondService,thirdService,arrivedTime):
-        self.firstService = firstService
-        self.secondService = secondService
-        self.thirdService = thirdService
+    def __init__(self,firstProcedure,secondProcedure,thirdProcedure,arrivedTime):
+        self.firstProcedure = firstProcedure
+        self.secondProcedure = secondProcedure
+        self.thirdProcedure = thirdProcedure
         self.arrivedTime = arrivedTime
 
     def getArrivedTime(self):
         return self.arrivedTime
 
-    def getFirstService(self):
-        return self.firstService
+    def getFirstProcedure(self):
+        return self.firstProcedure
 
-    def getSecondService(self):
-        return self.secondService
+    def getSecondProcedure(self):
+        return self.secondProcedure
 
-    def getThirdService(self):
-        return self.thirdService
+    def getThirdProcedure(self):
+        return self.thirdProcedure

@@ -1,10 +1,10 @@
-from collections import deque 
+from collections import deque
 import random
 from master import Master
 class Room:
 
-    MAX_SALARY = 1000
-    MIN_SALARY = 100
+    MAX_SALARY = 3000
+    MIN_SALARY = 200
     #queue = deque() #для запросов
 
 
@@ -15,7 +15,7 @@ class Room:
             self.masters.append(mas)
         #залезла
         self.queue = deque()
-        self.wentAway = 0   
+        self.wentAway = 0
         self.completedRequests = 0
 
     def addToQueue(self,request):
@@ -34,21 +34,22 @@ class Room:
     def getQueueSize(self):
         return len(self.queue)
 
-    def giveRequestMasters(self,currentTime):
+    def giveRequestMasters(self,currentTime,period):
+        time = random.randint(int(period[0]),int(period[1]))
         busyMasters = set()
         while (len(self.queue) != 0 and len(busyMasters) != len(self.masters)):
             number = int(random.random() * len(self.masters))
             if (number in busyMasters and self.masters[number].getReadyTakeRequest() <= currentTime):
                 master = self.masters[number]
                 arrivedTime = self.queue.popleft().getArrivedTime()
-                master.setReadyTakeRequest(max(master.getReadyTakeRequest(), arrivedTime) + 60)
+                master.setReadyTakeRequest(max(master.getReadyTakeRequest(), arrivedTime) + time)
                 master.increaseNumberOfClients()
-                master.setSpentTime(master.getSpentTime() + 60)
+                master.setSpentTime(master.getSpentTime() + time)
             busyMasters.add(number)
 
     def getAverageSalary(self):
         return self.getProfit() / len(self.masters)
-    
+
     def getProfit(self):
         summ = 0
         for master in self.masters:
@@ -64,11 +65,11 @@ class Room:
     def getCompletedRequests(self):
         return self.completedRequests - len(self.queue)
 
-    def updateData(self): 
+    def updateData(self):
         self.completedRequests = 0
         self.wentAway = 0
         self.queue = deque()
         for master in self.masters:
             master.updateData()
-        
-    
+
+
