@@ -1,13 +1,23 @@
 from salon import Salon
-from statistics import Statistic
-from request import Request
 import random
 import re
-class Model:
+from collections import namedtuple
 
-    oneDay = 480
-    def __init__(self,firstRoomAmount, secondRoomAmount, thirdRoomAmount,interval,
-                    requestPeriod,taskPeriod):
+Statistic = namedtuple('Statistic', ['numberOfDay', 'completedRequests',
+                               'lostRequests', 'profit', 'averageSalary',
+                               'averageWorkingTime', 'freeTime'])
+
+Request = namedtuple('Request', ['firstProcedure', 'secondProcedure',
+                               'thirdProcedure', 'arrivedTime'])
+
+class Model:
+    'class for generation requests, running salon and returning statistics'
+
+    DURATION_OF_DAY = 480 # длительность одного дня в минутах
+
+    def __init__(self, firstRoomAmount, secondRoomAmount, thirdRoomAmount,
+                 interval, requestPeriod, taskPeriod):
+
         self.salon = Salon(firstRoomAmount, secondRoomAmount, thirdRoomAmount)
         self.timeInterval = self.takeTimeInterval(interval)
         self.timePerOneDay = 0
@@ -23,26 +33,29 @@ class Model:
         self.timeRequestPeriod = self.takePeriod(requestPeriod)
         self.timeTaskPeriod = self.takePeriod(taskPeriod)
 
-    def takeTimeInterval(self,interval):
-        switcher={
+    def takeTimeInterval(self, interval):
+        switcher = {
             "15 минут": 15,
             "30 минут": 30,
             "1 час": 60
         }
-        return switcher.get(interval,15)
-    def takePeriod(self,str_period):
+        return switcher.get(interval, 15)
+
+    def takePeriod(self, str_period):
         period = re.findall(r'\d{1,3}', str_period)
-        print(period)
         return period
 
     def nextStep(self):
         while (self.timeStep < self.timeInterval):
-            self.salon.giveRequestMasters(self.timeStep + self.timePerOneDay,self.timeTaskPeriod)
-            self.timeStep = self.timeStep + self.generateRequest(self.timeStep + self.timePerOneDay)
+            self.salon.giveRequestMasters(self.timeStep + self.timePerOneDay,
+                                          self.timeTaskPeriod)
+            self.timeStep = self.timeStep + \
+                self.generateRequest(self.timeStep +
+                                     self.timePerOneDay)
             self.countRequestDay = self.countRequestDay + 1
         self.timePerOneDay = self.timePerOneDay + self.timeInterval
-        self.salon.giveRequestMasters(self.timePerOneDay,self.timeTaskPeriod)
-        if (self.timePerOneDay == self.oneDay):
+        self.salon.giveRequestMasters(self.timePerOneDay, self.timeTaskPeriod)
+        if (self.timePerOneDay == self.DURATION_OF_DAY):
             self.numberOfDay = self.numberOfDay + 1
             self.timePerOneDay = 0
             self.timeStep = 0
@@ -52,73 +65,66 @@ class Model:
         return None
 
     def collectStatistics(self):
-        lostRequests = self.salon.getFirstRoom().getWentAway() + self.salon.getSecondRoom().getWentAway() + self.salon.getThirdRoom().getWentAway()
+        lostRequests = self.salon.firstRoom.wentAway \
+                       + self.salon.secondRoom.wentAway + \
+                       self.salon.thirdRoom.wentAway
+
         self.allLostRequests = self.allLostRequests + lostRequests
-        averageSalary = int((self.salon.getFirstRoom().getAverageSalary() + self.salon.getSecondRoom().getAverageSalary() + self.salon.getThirdRoom().getAverageSalary()) / 3)
+
+        averageSalary = int((self.salon.firstRoom.getAverageSalary() +
+                             self.salon.secondRoom.getAverageSalary() +
+                             self.salon.thirdRoom.getAverageSalary()) / 3)
+
         self.allAverageSalary += averageSalary
-        averageSpentTime = int((self.salon.getFirstRoom().getAverageSpentTime() + self.salon.getSecondRoom().getAverageSpentTime() + self.salon.getThirdRoom().getAverageSpentTime()) / 3)
+        averageSpentTime = int((self.salon.firstRoom.getAverageSpentTime()
+                           + self.salon.secondRoom.getAverageSpentTime() +
+                        self.salon.thirdRoom.getAverageSpentTime()) / 3)
+
         self.allAverageWorkTime = self.allAverageWorkTime + averageSpentTime
-        completedRequests = self.salon.getFirstRoom().getCompletedRequests() + self.salon.getSecondRoom().getCompletedRequests() + self.salon.getThirdRoom().getCompletedRequests()
-        self.allCompletedRequests = self.allCompletedRequests + completedRequests
-        profit = int(self.salon.getFirstRoom().getProfit() + self.salon.getSecondRoom().getProfit() + self.salon.getThirdRoom().getProfit())
+        completedRequests = self.salon.firstRoom.completedRequests +\
+        self.salon.secondRoom.completedRequests + \
+            self.salon.thirdRoom.completedRequests
+
+        self.allCompletedRequests = self.allCompletedRequests + \
+            completedRequests
+
+        profit = int(self.salon.firstRoom.getProfit() +
+                     self.salon.secondRoom.getProfit() +
+                     self.salon.thirdRoom.getProfit())
+
         self.allProfit = self.allProfit + profit
-        freeTime = (self.oneDay - averageSpentTime) * 100 / self.oneDay
+
+        freeTime = (self.DURATION_OF_DAY - averageSpentTime) * 100 / self.DURATION_OF_DAY
+
         self.allFreeTime = self.allFreeTime + freeTime
         self.salon.updateDataForNextDay()
-        return Statistic(self.numberOfDay - 1, completedRequests, lostRequests, profit, averageSalary, averageSpentTime, freeTime)
+        return Statistic(self.numberOfDay - 1, completedRequests,
+                         lostRequests, profit, averageSalary,
+                         averageSpentTime, freeTime)
 
-
-    def generateRequest(self,currentTime):
-        numberTask = random.randint(1,3)
-        firstService = False
-        secondService = False
-        thirdService = False
+    def generateRequest(self, currentTime):
+        numberTask = random.randint(1, 3)
+        firstProcedure = False
+        secondProcedure = False
+        thirdProcedure = False
         if numberTask < 2:
-            firstService = True
+            firstProcedure = True
         elif numberTask < 3:
-            secondService = True
+            secondProcedure = True
         else:
-            thirdService = True
-        #метод takeRequest
-        self.salon.receiveRequest(Request(firstService, secondService, thirdService, currentTime))
+            thirdProcedure = True
+        # метод takeRequest
+        self.salon.receiveRequest(
+            Request(firstProcedure, secondProcedure,
+                    thirdProcedure, currentTime))
 
         timeUntilNextRequest = 0
         if (self.numberOfDay > 4 or self.timePerOneDay > 300):
-            timeUntilNextRequest = random.randint(int(self.timeRequestPeriod[0]),int(self.timeRequestPeriod[1]))
+            timeUntilNextRequest = random.randint(
+                int(self.timeRequestPeriod[0]), int(self.timeRequestPeriod[1]))
         else:
-            timeUntilNextRequest = random.randint(int(self.timeRequestPeriod[0])+10,int(self.timeRequestPeriod[1])+10)
+            timeUntilNextRequest = random.randint(
+                int(self.timeRequestPeriod[0])+10,
+                int(self.timeRequestPeriod[1])+10)
 
         return timeUntilNextRequest
-
-
-    def getCountRequestDay(self):
-        return self.countRequestDay
-
-    def getTimePerOneDay(self):
-        return self.timePerOneDay
-
-    def getNumberOfDay(self):
-        return self.numberOfDay
-
-    def getSalon(self):
-        return self.salon
-
-    def getAllLostRequests(self):
-        return self.allLostRequests
-
-    def getAllAverageSalary(self):
-        return self.allAverageSalary
-
-    def getAllAverageWorkTime(self):
-        return self.allAverageWorkTime
-
-    def getAllCompletedRequests(self):
-        return self.allCompletedRequests
-
-    def getAllProfit(self):
-        return self.allProfit
-
-    def getAllFreeTime(self):
-        return self.allFreeTime
-
-
