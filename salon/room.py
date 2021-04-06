@@ -34,7 +34,7 @@ class Room:
         while (len(self.queue) != 0 and len(busyMasters) != len(self.masters)):
             number = int(random.random() * len(self.masters))
             if (number in busyMasters
-                    and self.masters[number].readyTakeRequest  <= currentTime):
+                    and self.masters[number].readyTakeRequest <= currentTime):
                 master = self.masters[number]
                 arrivedTime = self.queue.popleft().arrivedTime
                 master.readyTakeRequest = \

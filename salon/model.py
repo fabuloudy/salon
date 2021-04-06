@@ -4,15 +4,16 @@ import re
 from collections import namedtuple
 
 Statistic = namedtuple('Statistic', ['numberOfDay', 'completedRequests',
-                               'lostRequests', 'profit', 'averageSalary',
-                               'averageWorkingTime', 'freeTime'])
+                                     'lostRequests', 'profit', 'averageSalary',
+                                     'averageWorkingTime', 'freeTime'])
 
 Request = namedtuple('Request', ['numberProcedure', 'arrivedTime'])
+
 
 class Model:
     'class for generation requests, running salon and returning statistics'
 
-    DURATION_OF_DAY = 480 # длительность одного дня в минутах
+    DURATION_OF_DAY = 480  # длительность одного дня в минутах
 
     def __init__(self, firstRoomAmount, secondRoomAmount, thirdRoomAmount,
                  interval, requestPeriod, taskPeriod):
@@ -69,21 +70,25 @@ class Model:
         averageSpentTime = 0
         completedRequests = 0
         profit = 0
-        for key,_ in self.salon.house.items():
+        for key, _ in self.salon.house.items():
             lostRequests = lostRequests + self.salon.house[key].wentAway
-            averageSalary = averageSalary + int(self.salon.house[key].getAverageSalary())
-            averageSpentTime = averageSpentTime + int(self.salon.house[key].getAverageSpentTime())
-            completedRequests = completedRequests + int(self.salon.house[key].completedRequests)
-            profit =  profit + int(self.salon.house[key].getProfit())
+            averageSalary = averageSalary + \
+                int(self.salon.house[key].getAverageSalary())
+            averageSpentTime = averageSpentTime + \
+                int(self.salon.house[key].getAverageSpentTime())
+            completedRequests = completedRequests + \
+                int(self.salon.house[key].completedRequests)
+            profit = profit + int(self.salon.house[key].getProfit())
         self.allLostRequests = self.allLostRequests + lostRequests
         averageSalary = int(averageSalary / 3)
-        averageSpentTime =  int(averageSpentTime / 3)
+        averageSpentTime = int(averageSpentTime / 3)
         self.allAverageSalary += averageSalary
         self.allAverageWorkTime = self.allAverageWorkTime + averageSpentTime
         self.allCompletedRequests = self.allCompletedRequests + completedRequests
         self.allProfit = self.allProfit + profit
 
-        freeTime = (self.DURATION_OF_DAY - averageSpentTime) * 100 / self.DURATION_OF_DAY
+        freeTime = (self.DURATION_OF_DAY - averageSpentTime) * \
+            100 / self.DURATION_OF_DAY
 
         self.allFreeTime = self.allFreeTime + freeTime
         self.salon.updateDataForNextDay()
