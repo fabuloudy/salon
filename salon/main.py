@@ -194,19 +194,19 @@ if __name__ == "__main__":
     def changeColorsOfCircles():
         'changing colors for busy and free masters'
         currentTime = model.timePerOneDay
-        masters = model.salon.firstRoom.masters
+        masters = model.salon.house['1'].masters
         for i in range(0, len(masters)):
             if (masters[i].readyTakeRequest <= currentTime):
                 salon.TKCanvas.itemconfig(mastersRoom1[i], fill="green")
             else:
                 salon.TKCanvas.itemconfig(mastersRoom1[i], fill="red")
-        masters = model.salon.secondRoom.masters
+        masters = model.salon.house['2'].masters
         for i in range(0, len(masters)):
             if (masters[i].readyTakeRequest <= currentTime):
                 salon.TKCanvas.itemconfig(mastersRoom2[i], fill="green")
             else:
                 salon.TKCanvas.itemconfig(mastersRoom2[i], fill="red")
-        masters = model.salon.thirdRoom.masters
+        masters = model.salon.house['3'].masters
         for i in range(0, len(masters)):
             if (masters[i].readyTakeRequest <= currentTime):
                 salon.TKCanvas.itemconfig(mastersRoom3[i], fill="green")
@@ -230,9 +230,9 @@ if __name__ == "__main__":
             str(model.timePerOneDay // 60) + " ч. " + \
             str(model.timePerOneDay % 60) + " мин "
         requests = str(model.countRequestDay)
-        lengthQueue1 = str(model.salon.firstRoom.getQueueSize())
-        lengthQueue2 = str(model.salon.secondRoom.getQueueSize())
-        lengthQueue3 = str(model.salon.thirdRoom.getQueueSize())
+        lengthQueue1 = str(model.salon.house['1'].getQueueSize())
+        lengthQueue2 = str(model.salon.house['2'].getQueueSize())
+        lengthQueue3 = str(model.salon.house['3'].getQueueSize())
         changeColorsOfCircles()
         print_curr_info(time, requests, lengthQueue1, lengthQueue2, lengthQueue3)
 

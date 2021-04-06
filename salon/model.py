@@ -7,8 +7,7 @@ Statistic = namedtuple('Statistic', ['numberOfDay', 'completedRequests',
                                'lostRequests', 'profit', 'averageSalary',
                                'averageWorkingTime', 'freeTime'])
 
-Request = namedtuple('Request', ['firstProcedure', 'secondProcedure',
-                               'thirdProcedure', 'arrivedTime'])
+Request = namedtuple('Request', ['numberProcedure', 'arrivedTime'])
 
 class Model:
     'class for generation requests, running salon and returning statistics'
@@ -65,33 +64,23 @@ class Model:
         return None
 
     def collectStatistics(self):
-        lostRequests = self.salon.firstRoom.wentAway \
-                       + self.salon.secondRoom.wentAway + \
-                       self.salon.thirdRoom.wentAway
-
+        lostRequests = 0
+        averageSalary = 0
+        averageSpentTime = 0
+        completedRequests = 0
+        profit = 0
+        for key,_ in self.salon.house.items():
+            lostRequests = lostRequests + self.salon.house[key].wentAway
+            averageSalary = averageSalary + int(self.salon.house[key].getAverageSalary())
+            averageSpentTime = averageSpentTime + int(self.salon.house[key].getAverageSpentTime())
+            completedRequests = completedRequests + int(self.salon.house[key].completedRequests)
+            profit =  profit + int(self.salon.house[key].getProfit())
         self.allLostRequests = self.allLostRequests + lostRequests
-
-        averageSalary = int((self.salon.firstRoom.getAverageSalary() +
-                             self.salon.secondRoom.getAverageSalary() +
-                             self.salon.thirdRoom.getAverageSalary()) / 3)
-
+        averageSalary = int(averageSalary / 3)
+        averageSpentTime =  int(averageSpentTime / 3)
         self.allAverageSalary += averageSalary
-        averageSpentTime = int((self.salon.firstRoom.getAverageSpentTime()
-                           + self.salon.secondRoom.getAverageSpentTime() +
-                        self.salon.thirdRoom.getAverageSpentTime()) / 3)
-
         self.allAverageWorkTime = self.allAverageWorkTime + averageSpentTime
-        completedRequests = self.salon.firstRoom.completedRequests +\
-        self.salon.secondRoom.completedRequests + \
-            self.salon.thirdRoom.completedRequests
-
-        self.allCompletedRequests = self.allCompletedRequests + \
-            completedRequests
-
-        profit = int(self.salon.firstRoom.getProfit() +
-                     self.salon.secondRoom.getProfit() +
-                     self.salon.thirdRoom.getProfit())
-
+        self.allCompletedRequests = self.allCompletedRequests + completedRequests
         self.allProfit = self.allProfit + profit
 
         freeTime = (self.DURATION_OF_DAY - averageSpentTime) * 100 / self.DURATION_OF_DAY
@@ -104,19 +93,9 @@ class Model:
 
     def generateRequest(self, currentTime):
         numberTask = random.randint(1, 3)
-        firstProcedure = False
-        secondProcedure = False
-        thirdProcedure = False
-        if numberTask < 2:
-            firstProcedure = True
-        elif numberTask < 3:
-            secondProcedure = True
-        else:
-            thirdProcedure = True
         # метод takeRequest
         self.salon.receiveRequest(
-            Request(firstProcedure, secondProcedure,
-                    thirdProcedure, currentTime))
+            Request(numberTask, currentTime))
 
         timeUntilNextRequest = 0
         if (self.numberOfDay > 4 or self.timePerOneDay > 300):
